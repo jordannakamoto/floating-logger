@@ -13,14 +13,18 @@
     "copy-css": "cp src/FloatingLogger.css dist/"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-redux": "^7.2.4",
-    "react-draggable": "^4.4.3"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "next": "^13.5.6"
+  },
+  "dependencies": {
+    "react-draggable": "^4.4.5"
   },
   "devDependencies": {
-    "typescript": "^4.3.5",
-    "@types/react": "^17.0.11",
-    "@types/react-redux": "^7.1.16"
+    "typescript": "^5.2.2",
+    "@types/react": "^18.2.20",
+    "@types/react-redux": "^8.0.20",
+    "@types/react-dom": "^18.2.7"
   }
 }
