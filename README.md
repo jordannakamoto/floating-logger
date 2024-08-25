@@ -1,8 +1,10 @@
-# Floating Logger
+# Floating Logger Dev Tool
 
 A development tool for NextJS/Redux apps.
 
 Provides a floating component on the front end to send logs to as an alternative to console.log() so we don't have to check the Web Inspector.
+
+<img width="311" alt="image" src="https://github.com/user-attachments/assets/f1b46199-6f36-40f1-822f-f76ca2df26ee">
 
 Shows Redux state.
 
@@ -12,7 +14,7 @@ Usage in NextJS (layout.tsx):
 - Initialize Redux store and Provider
 - Insert the LogProvider and provide the Redux state to Floating Logger
 `configureLogger('myCustomLogger')` sets a global function to be used across the app so you don't have to import FloatingLogger elsewhere. i.e. you can just write myCustomLogger("a message") from any component. Or you would set `configureLogger('log')` and then call log("a message").
-```
+```js
 'use client';
 
 import "./globals.css";
