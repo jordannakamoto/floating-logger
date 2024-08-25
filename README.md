@@ -2,7 +2,7 @@
 
 A development tool for NextJS/Redux apps.
 
-Provides a floating component on the front end to send logs to as an alternative to console.log() so we don't have to check the Web Inspector.
+Provides a floating component on the front end to send logs to as an alternative to console.log() so we don't have to check the Web Inspector to monitor events.
 
 <img width="311" alt="image" src="https://github.com/user-attachments/assets/f1b46199-6f36-40f1-822f-f76ca2df26ee">
 
