@@ -1,0 +1,59 @@
+.floating-logger {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    border: 1px solid #ccc;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 1000;
+  }
+  
+  .logger-header {
+    background-color: #333;
+    color: white;
+    padding: 5px;
+    cursor: grab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logger-content {
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 350px;
+  }
+  
+  .log-entry {
+    padding: 3px 0;
+  }
+  
+  .log-entry.info {
+    color: blue;
+  }
+  
+  .log-entry.warn {
+    color: orange;
+  }
+  
+  .log-entry.error {
+    color: red;
+  }
+  
+  .log-entry.debug {
+    color: gray;
+  }
+  
+  .redux-state {
+    margin-top: 10px;
+    font-size: 0.85em;
+  }
+  
+  .minimized {
+    width: 200px;
+    height: 40px;
+    overflow: hidden;
+  }

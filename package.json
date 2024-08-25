@@ -1,0 +1,26 @@
+{
+  "name": "floating-logger",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && npm run copy-css && npm link && cd test-app && npm link floating-logger && npm run dev",
+    "copy-css": "cp src/FloatingLogger.css dist/"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-draggable": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.5",
+    "@types/react": "^17.0.11",
+    "@types/react-redux": "^7.1.16"
+  }
+}
