@@ -2,6 +2,8 @@
 
 A development tool for Next.js and Redux applications that captures and displays logs directly within a floating panel on the app.
 
+![screen1](readme_images/screen1.png "Screen1")
+
 ## Features
 
 - **Floating Log Display**: Shows logs in a floating panel within your application interface.
