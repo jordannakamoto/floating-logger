@@ -1,4 +1,4 @@
-export type LogFunctionType = (levelOrMessage: 'info' | 'warn' | 'error' | 'debug' | string, message?: string) => void;
+export type LogFunctionType = (levelOrMessage: 'info' | 'warn' | 'error' | 'debug' | 'api' | string, message?: string) => void;
 export declare let externalAddLog: LogFunctionType;
 export declare const setLogFunction: (fn: LogFunctionType) => void;
 export declare const addLog: LogFunctionType;
