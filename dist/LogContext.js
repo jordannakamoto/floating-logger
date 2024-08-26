@@ -1,39 +1,53 @@
-import { addLog as externalAddLog, setLogFunction } from './initLogger'; // Import the correct LogFunctionType
+import { addLog as externalAddLog, setLogFunction } from './initLogger';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 // Initialize the context with default values
 const LogContext = createContext(undefined);
 let isLogging = false; // Prevent recursive logging
-// Create a provider component that sets up the logging function and manages log state
 export const LogProvider = ({ children }) => {
     const [logs, setLogs] = useState([]); // State to hold log entries
-    // Memoize the log function to prevent unnecessary re-renders
     const log = useCallback((levelOrMessage, message) => {
         if (isLogging)
-            return; // Exit if already logging to prevent recursion
-        isLogging = true; // Set the flag to indicate logging in progress
+            return;
+        isLogging = true;
         try {
-            if (typeof message === 'undefined') {
-                const newLog = { level: 'info', message: levelOrMessage, timestamp: new Date() };
-                setLogs((prevLogs) => [...prevLogs, newLog]);
-                externalAddLog('info', levelOrMessage); // Call the external log function
-            }
-            else {
-                const newLog = { level: levelOrMessage, message, timestamp: new Date() };
-                setLogs((prevLogs) => [...prevLogs, newLog]);
-                externalAddLog(levelOrMessage, message); // Call the external log function
-            }
+            const newLog = typeof message === 'undefined'
+                ? { level: 'info', message: levelOrMessage, timestamp: new Date() }
+                : { level: levelOrMessage, message, timestamp: new Date() };
+            setLogs((prevLogs) => [...prevLogs, newLog]);
+            externalAddLog(newLog.level, newLog.message);
         }
         finally {
-            isLogging = false; // Reset the flag after logging is done
+            isLogging = false;
         }
     }, []);
     useEffect(() => {
-        // Set up the log function globally only once to avoid re-triggering the effect
         setLogFunction(log);
+        // Start the WebSocket server by calling the API route
+        fetch('/api/start-logger-server')
+            .then((response) => response.json())
+            .then(() => {
+            // Initialize WebSocket connection
+            const socket = new WebSocket('ws://localhost:8080');
+            socket.onopen = () => console.log('WebSocket connection established');
+            socket.onmessage = (event) => {
+                try {
+                    const newLog = JSON.parse(event.data);
+                    setLogs((prevLogs) => [...prevLogs, newLog]);
+                }
+                catch (e) {
+                    console.error('Error parsing WebSocket message:', e);
+                }
+            };
+            socket.onerror = (error) => console.error('WebSocket error:', error);
+            socket.onclose = () => console.log('WebSocket connection closed');
+            return () => socket.close();
+        })
+            .catch((error) => {
+            console.error('Error starting WebSocket server:', error);
+        });
     }, [log]);
     return (React.createElement(LogContext.Provider, { value: { logs, log } }, children));
 };
-// Custom hook to use the log function context
 export const useLog = () => {
     const context = useContext(LogContext);
     if (context === undefined) {

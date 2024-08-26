@@ -1,10 +1,11 @@
 // src/initLogger.ts
-// Initialize external log function
-export let externalAddLog = () => { }; // No-op function
+// Initialize external log function (no-op function initially)
+export let externalAddLog = () => { };
+// Function to set the log function
 export const setLogFunction = (fn) => {
     externalAddLog = fn;
 };
-// Example function to add log
+// Log function to be used globally
 export const addLog = (levelOrMessage, message) => {
     if (typeof message === 'undefined') {
         externalAddLog('info', levelOrMessage);
@@ -14,23 +15,30 @@ export const addLog = (levelOrMessage, message) => {
     }
 };
 let logFunctionAlias = 'addLog';
-let isLogging = false; // Flag to prevent recursive calls
 export const configureLogger = (aliasName) => {
     logFunctionAlias = aliasName;
-    if (typeof globalThis !== 'undefined') {
+    // Set the global log function on the frontend
+    if (typeof window !== 'undefined' && typeof globalThis !== 'undefined') {
         globalThis[logFunctionAlias] = addLog;
+    }
+    // Send a request to the backend to configure the server logger with the same alias
+    if (typeof window !== 'undefined') {
+        fetch('/api/start-logger-server', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ aliasName }),
+        }).catch((error) => {
+            console.error('Failed to configure server logger:', error);
+        });
     }
 };
 if (typeof globalThis !== 'undefined') {
-    console.log('Global setup running...'); // Debugging log
     if (typeof globalThis[logFunctionAlias] === 'undefined') {
         globalThis[logFunctionAlias] = addLog;
-        console.log('Global log function set up:', logFunctionAlias); // Debugging log
     }
     if (typeof globalThis.addInfoLog === 'undefined') {
         globalThis.addInfoLog = (message) => addLog('info', message);
-        console.log('Global addInfoLog function set up.'); // Debugging log
     }
 }
-// Note: Do not set the log function globally at this point to avoid SSR issues
-// setLogFunction(addLog);

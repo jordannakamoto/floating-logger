@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./src/index.tsx",
+    "./server": "./src/server/index.tsx"
+  },
   "files": [
     "dist/**/*",
     "src/**/*",
@@ -13,14 +17,19 @@
     "copy-css": "cp src/FloatingLogger.css dist/"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-redux": "^7.2.4",
-    "react-draggable": "^4.4.3"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.0",
+    "next": "^14.2.6"
   },
   "devDependencies": {
-    "typescript": "^4.3.5",
-    "@types/react": "^17.0.11",
-    "@types/react-redux": "^7.1.16"
+    "@types/react": "^18.2.20",
+    "@types/react-redux": "^7.1.24",
+    "@types/ws": "^8.5.4",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "react-draggable": "^4.4.3",
+    "ws": "^8.18.0"
   }
 }

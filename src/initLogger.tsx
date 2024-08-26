@@ -1,54 +1,65 @@
 // src/initLogger.ts
 
+import { broadcastLog } from './server/wsServer'; // Import only when needed
+
 // Define the type for the log function
 export type LogFunctionType = (
   levelOrMessage: 'info' | 'warn' | 'error' | 'debug' | 'api' | string,
   message?: string
 ) => void;
 
-// Initialize external log function
-export let externalAddLog: LogFunctionType = () => {}; // No-op function
+// Initialize external log function (no-op function initially)
+export let externalAddLog: LogFunctionType = () => {};
 
+// Function to set the log function
 export const setLogFunction = (fn: LogFunctionType) => {
   externalAddLog = fn;
 };
 
-// Example function to add log
+// Log function to be used globally
 export const addLog: LogFunctionType = (levelOrMessage, message?) => {
   if (typeof message === 'undefined') {
     externalAddLog('info', levelOrMessage);
   } else {
-    externalAddLog(levelOrMessage as 'info' | 'warn' | 'error' | 'debug' | 'api' , message);
+    externalAddLog(levelOrMessage as 'info' | 'warn' | 'error' | 'debug' | 'api', message);
   }
 };
+
 let logFunctionAlias = 'addLog';
 
-let isLogging = false; // Flag to prevent recursive calls
-
 export const configureLogger = (aliasName: string) => {
-logFunctionAlias = aliasName;
-if (typeof globalThis !== 'undefined') {
-  (globalThis as any)[logFunctionAlias] = addLog;
-}
+  logFunctionAlias = aliasName;
+
+  // Set the global log function on the frontend
+  if (typeof window !== 'undefined' && typeof globalThis !== 'undefined') {
+    (globalThis as any)[logFunctionAlias] = addLog;
+  }
+
+  // Send a request to the backend to configure the server logger with the same alias
+  if (typeof window !== 'undefined') {
+    fetch('/api/start-logger-server', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ aliasName }),
+    }).catch((error) => {
+      console.error('Failed to configure server logger:', error);
+    });
+  }
 };
 
 declare global {
-var addLog: LogFunctionType;
-var addInfoLog: (message: string) => void;
+  var addLog: LogFunctionType;
+  var addInfoLog: (message: string) => void;
 }
 
 if (typeof globalThis !== 'undefined') {
-console.log('Global setup running...'); // Debugging log
-if (typeof (globalThis as any)[logFunctionAlias] === 'undefined') {
-  (globalThis as any)[logFunctionAlias] = addLog;
-  console.log('Global log function set up:', logFunctionAlias);  // Debugging log
-}
+  if (typeof (globalThis as any)[logFunctionAlias] === 'undefined') {
+    (globalThis as any)[logFunctionAlias] = addLog;
+  }
 
-if (typeof globalThis.addInfoLog === 'undefined') {
-  globalThis.addInfoLog = (message: string) => addLog('info', message);
-  console.log('Global addInfoLog function set up.');  // Debugging log
+  if (typeof globalThis.addInfoLog === 'undefined') {
+    globalThis.addInfoLog = (message: string) => addLog('info', message);
+  }
 }
-}
-
-// Note: Do not set the log function globally at this point to avoid SSR issues
-// setLogFunction(addLog);
