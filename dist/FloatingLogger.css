@@ -1,24 +1,54 @@
+/* FloatingLogger.css */
+
 .floating-logger {
+  font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
+    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 300px;
+  font-size: 11px;
+  width: 500px;
   max-height: 400px;
   border: 1px solid #ccc;
   background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   z-index: 1000;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.floating-logger.dark {
+  background-color: #333;
+  color: #f0f0f0;
+  border-color: #666;
 }
 
 .logger-header {
+  display: flex;           /* Use flexbox for alignment */
+  justify-content: space-between; /* Space out elements */
+  align-items: center;
   background-color: #333;
   color: white;
   padding: 5px;
   cursor: grab;
+}
+
+.header-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 5px;  /* Adds space between the buttons */
+}
+
+.logger-header button {
+  background: none; /* Remove default button styling */
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.floating-logger.dark .logger-header {
+  background-color: #222;
 }
 
 .logger-content {
@@ -49,6 +79,26 @@
 
 .log-entry.api {
   color: green;
+}
+
+.floating-logger.dark .log-entry.info {
+  color: #80c0ff;
+}
+
+.floating-logger.dark .log-entry.warn {
+  color: #ffa500;
+}
+
+.floating-logger.dark .log-entry.error {
+  color: #ff6666;
+}
+
+.floating-logger.dark .log-entry.debug {
+  color: #aaaaaa;
+}
+
+.floating-logger.dark .log-entry.api {
+  color: #80ff80;
 }
 
 .redux-state {

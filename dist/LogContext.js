@@ -9,7 +9,7 @@ let socketInstance = null;
 const initializeWebSocket = (setLogs) => {
     if (!socketInstance) {
         socketInstance = new WebSocket('ws://localhost:8080');
-        socketInstance.onopen = () => console.log('WebSocket connection established');
+        socketInstance.onopen = () => console.log('Floating Logger - Backend Socket connection established');
         socketInstance.onmessage = (event) => {
             try {
                 const newLog = JSON.parse(event.data);
