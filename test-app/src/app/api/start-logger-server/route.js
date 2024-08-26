@@ -1,12 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
+// src/app/api/test-route/route.js
+
+import { NextResponse } from 'next/server';
+
+// Use a global variable to track the initialization state
+globalThis.isWebSocketServerInitialized = globalThis.isWebSocketServerInitialized || false;
 
 export async function GET(request) {
-  if (typeof window === 'undefined') {
-    // Server-side code to start the WebSocket server
-    await import('floating-logger/server');
+  // Only initialize the WebSocket server once
+  if (typeof window === 'undefined' && !globalThis.isWebSocketServerInitialized) {
+    await import('floating-logger/server'); // Initialize WebSocket server
+    globalThis.isWebSocketServerInitialized = true; // Mark as initialized
+    console.log('WebSocket server initialized');
   }
 
-  return NextResponse.json('Floating Logger Websocket server initialized', { status: 200 });
+  return NextResponse.json('Floating Logger WebSocket server initialized', { status: 200 });
 }
 
 export async function POST(request) {

@@ -87,12 +87,12 @@ const FloatingLogger: React.FC<FloatingLoggerProps> = ({ logSelector }) => {
   // Effect to handle component mount/unmount logging
   useEffect(() => {
     if (hasMounted) { // Only log on client side
-      console.log('FloatingLogger component mounted');
+      // console.log('FloatingLogger component mounted');
       log('info', 'FloatingLogger mounted');
     }
 
     return () => {
-      console.log('FloatingLogger component unmounted');
+      // console.log('FloatingLogger component unmounted');
     };
   }, [log, hasMounted]); // Log function from context is stable due to memoization
 

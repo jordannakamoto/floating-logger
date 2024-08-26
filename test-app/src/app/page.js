@@ -24,14 +24,23 @@ const Home = () => {
 
   const testApiRoute = async () => {
     try {
-      myCustomLog('api', 'Testing API route'); // Log the action of testing API route
+      const numberToSend = 5; // The number you want to send in the POST request
+  
+      myCustomLog('api', `Sending number ${numberToSend} to API route`); // Log the input
+  
       const response = await fetch('/api/test-route', {
-        method: 'GET',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ number: numberToSend })
       });
+  
       const data = await response.json();
-      myCustomLog('api', `API Response: ${JSON.stringify(data)}`);
+  
+      myCustomLog('api', `API Response: ${JSON.stringify(data)}`); // Log the output
     } catch (error) {
-      myCustomLog('error', `API Request failed: ${error}`);
+      myCustomLog('error', `API Request failed: ${error.message}`);
     }
   };
 

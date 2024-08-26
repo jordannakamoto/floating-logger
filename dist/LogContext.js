@@ -3,6 +3,29 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 // Initialize the context with default values
 const LogContext = createContext(undefined);
 let isLogging = false; // Prevent recursive logging
+// Singleton WebSocket instance
+let socketInstance = null;
+// Function to initialize WebSocket connection
+const initializeWebSocket = (setLogs) => {
+    if (!socketInstance) {
+        socketInstance = new WebSocket('ws://localhost:8080');
+        socketInstance.onopen = () => console.log('WebSocket connection established');
+        socketInstance.onmessage = (event) => {
+            try {
+                const newLog = JSON.parse(event.data);
+                setLogs((prevLogs) => [...prevLogs, newLog]);
+            }
+            catch (e) {
+                console.error('Error parsing WebSocket message:', e);
+            }
+        };
+        socketInstance.onerror = (error) => console.error('WebSocket error:', error);
+        socketInstance.onclose = () => {
+            console.log('WebSocket connection closed');
+            socketInstance = null; // Reset socketInstance to allow reconnection
+        };
+    }
+};
 export const LogProvider = ({ children }) => {
     const [logs, setLogs] = useState([]); // State to hold log entries
     const log = useCallback((levelOrMessage, message) => {
@@ -22,29 +45,25 @@ export const LogProvider = ({ children }) => {
     }, []);
     useEffect(() => {
         setLogFunction(log);
-        // Start the WebSocket server by calling the API route
-        fetch('/api/start-logger-server')
-            .then((response) => response.json())
-            .then(() => {
-            // Initialize WebSocket connection
-            const socket = new WebSocket('ws://localhost:8080');
-            socket.onopen = () => console.log('WebSocket connection established');
-            socket.onmessage = (event) => {
-                try {
-                    const newLog = JSON.parse(event.data);
-                    setLogs((prevLogs) => [...prevLogs, newLog]);
-                }
-                catch (e) {
-                    console.error('Error parsing WebSocket message:', e);
-                }
-            };
-            socket.onerror = (error) => console.error('WebSocket error:', error);
-            socket.onclose = () => console.log('WebSocket connection closed');
-            return () => socket.close();
-        })
-            .catch((error) => {
-            console.error('Error starting WebSocket server:', error);
-        });
+        if (typeof window !== 'undefined') {
+            // Only initialize WebSocket connection on the client
+            // Start the WebSocket server by calling the API route
+            fetch('/api/start-logger-server')
+                .then((response) => response.json())
+                .then(() => {
+                initializeWebSocket(setLogs); // Initialize WebSocket
+            })
+                .catch((error) => {
+                console.error('Error starting WebSocket server:', error);
+            });
+        }
+        // Cleanup function to close WebSocket connection on component unmount
+        return () => {
+            if (socketInstance) {
+                socketInstance.close();
+                socketInstance = null; // Reset socket reference
+            }
+        };
     }, [log]);
     return (React.createElement(LogContext.Provider, { value: { logs, log } }, children));
 };
