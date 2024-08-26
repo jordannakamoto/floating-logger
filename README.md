@@ -1,20 +1,16 @@
 # Floating Logger Dev Tool
 
-A development tool for Next.js and Redux applications.
-
-**Floating Logger** is a front-end tool to capture and display logs directly in your application, eliminating the need to check the browser's console. It also displays the Redux state for easy monitoring of app state changes.
-
-![Floating Logger Screenshot](https://github.com/user-attachments/assets/f1b46199-6f36-40f1-822f-f76ca2df26ee)
+A development tool for Next.js and Redux applications that captures and displays logs directly within a floating panel on the app.
 
 ## Features
 
-- **Floating Log Display**: Shows logs in a floating panel on the application interface.
-- **Redux State Viewer**: Displays current Redux state.
-- **Customizable Logger Function**: Allows you to set a global function for logging across your app.
+- **Floating Log Display**: Shows logs in a floating panel within your application interface.
+- **Redux State Viewer**: Displays the current Redux state.
+- **Backend and Frontend Logging**: Capture logs from your API routes as well as the front end components.
 
 ## Installation
 
-First, install the package via npm:
+Install the package via npm:
 
 ```bash
 npm install floating-logger
@@ -22,11 +18,9 @@ npm install floating-logger
 
 ## Setup in Next.js
 
-To use Floating Logger in your Next.js app, follow these steps:
-
 ### 1. Initialize Redux Store and Providers
 
-In your `layout.tsx` or `App.tsx` (for older Next.js versions), set up the Redux store and the Floating Logger:
+In your `layout.tsx` or `App.tsx`, set up the Redux store and the Floating Logger:
 
 ```tsx
 'use client';
@@ -35,19 +29,19 @@ import "./globals.css";
 import { FloatingLogger, LogProvider, configureLogger } from 'floating-logger';
 import { Inter } from "next/font/google";
 import { Provider } from 'react-redux';
-import store from './redux/store'; // Adjust the path to your store
+import store from './redux/store';
 
 const inter = Inter({ subsets: ["latin"] });
 
-configureLogger('myCustomLog'); // Optional: Set a global logging function
+configureLogger('myCustomLog'); // Sets a global logging function alias
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
         <Provider store={store}>
-          <LogProvider> {/* Provides the logging context */}
-            <FloatingLogger logSelector={(state) => state} /> {/* Displays the floating logger */}
+          <LogProvider>
+            <FloatingLogger logSelector={(state) => state} />
             {children}
           </LogProvider>
         </Provider>
@@ -59,9 +53,7 @@ export default function RootLayout({ children }) {
 
 ### 2. Use Logging in Your Components
 
-Log messages directly from any component without needing additional imports:
-
-Example in `page.tsx`:
+Log messages directly from any component:
 
 ```tsx
 'use client';
@@ -75,24 +67,19 @@ const Home = () => {
   const count = useSelector((state) => state.counter.count);
 
   useEffect(() => {
-    myCustomLog('info', 'Home page loaded'); // Log message using the custom alias
+    myCustomLog('info', 'Home page loaded');
   }, []);
 
   const handleIncrement = () => {
     dispatch(increment());
-    myCustomLog('warn', 'Incremented count'); // Log a warning
-  };
-
-  const test = () => {
-    myCustomLog('debug', 'Test button clicked'); // Log a debug message
+    myCustomLog('warn', 'Incremented count');
   };
 
   return (
-    <div style={{ height: '100vh' }}>
+    <div>
       <h1>Floating Logger Test App</h1>
       <p>Count: {count}</p>
       <button onClick={handleIncrement}>Increment</button>
-      <button onClick={test}>Test</button>
     </div>
   );
 };
@@ -100,23 +87,54 @@ const Home = () => {
 export default Home;
 ```
 
-### 3. Configure Logger Globally (Optional)
+### 3. Backend Logging Setup
 
-To avoid importing `FloatingLogger` everywhere, configure a global logger function:
+**Floating Logger** API/server logs can also be sent to floating logger. Information from the backend is sent over a Websocket so we can view it directly in our app. You will have to add an api route to allow the floating-logger package to establish the socket connection:
 
-```tsx
-configureLogger('myCustomLog'); // Now use myCustomLog() anywhere in your app
+#### Step 1: Create an API Route to Start the Logger
+
+Add the API route in Next at `src/app/api/start-logger-server.ts`:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  if (typeof window === 'undefined') {
+    await import('floating-logger/server'); // Start the WebSocket server
+  }
+
+  return NextResponse.json({ message: 'WebSocket server initialized' }, { status: 200 });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { aliasName } = await request.json();
+
+    if (typeof window === 'undefined') {
+      const { configureServerLogger } = await import('floating-logger/server');
+      configureServerLogger(aliasName);
+      return NextResponse.json({ message: 'Logger configured' }, { status: 200 });
+    }
+
+    return NextResponse.json({ error: 'Cannot configure logger on the client side' }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to configure logger' }, { status: 500 });
+  }
+}
 ```
 
-## Configuration
+#### Step 2: Start and Configure the Logger
 
-- **`configureLogger(alias: string)`**: Set a global alias for the logging function to avoid name conflicts. The default alias is `'addLog'`.
+- **Start the Logger**: Send a `GET` request to `/api/start-logger-server` to initialize the WebSocket server.
+- **Configure Logger Alias**: Send a `POST` request to `/api/start-logger-server` with the desired alias name (`aliasName`) to synchronize the alias with the frontend logger.
 
-## Example Usage
+### Configuring the Alias Name
 
-- **Log Information**: `myCustomLog('info', 'This is an info log');`
-- **Log Warnings**: `myCustomLog('warn', 'This is a warning log');`
-- **Log Errors**: `myCustomLog('error', 'This is an error log');`
-- **Log Debug Messages**: `myCustomLog('debug', 'Debugging log message');`
+To ensure consistency between frontend and backend logging, the log function alias name is configured once on the frontend using `configureLogger('myCustomLog')` or maybe `configureLogger('log')`. The same alias is then applied to the backend.
 
-This documentation is now fully formatted with appropriate markdown for each section, providing clear and simple instructions on how to install, set up, and use the Floating Logger in a Next.js application.
+## Quick Start Commands
+
+1. **Log Information**: `myCustomLog('info', 'This is an info log');`
+2. **Log Warnings**: `myCustomLog('warn', 'This is a warning log');`
+3. **Log Errors**: `myCustomLog('error', 'This is an error log');`
+4. **Log Debug Messages**: `myCustomLog('debug', 'Debugging log message');`
